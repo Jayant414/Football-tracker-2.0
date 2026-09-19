@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ballon d'Or Tracker & Match Center</title>
+  <style>
+    :root {
+      --gold-primary: #d4af37;
+      --gold-light: #fef08a;
+      --gold-bright: #facc15;
+      --gold-dark: #8a5a22;
+      --gold-metallic: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+      --bg-dark: #070709;
+      --card-bg: rgba(18, 17, 21, 0.94);
+      --border-gold: rgba(212, 175, 55, 0.28);
+      --glow-gold: rgba(212, 175, 55, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 5rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 8%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 750px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+      filter: blur(90px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Top Left Trophy */
+    .top-left-trophy {
+      position: absolute;
+      top: 24px;
+      left: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .top-left-trophy:hover {
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    .trophy-svg-container {
+      width: 44px;
+      height: 44px;
+      filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.65));
+      animation: trophyFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes trophyFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .trophy-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .trophy-sub-label {
+      font-size: 0.62rem;
+      letter-spacing: 3px;
+      color: var(--gold-dark);
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .trophy-main-label {
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      background: var(--gold-metallic);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .main-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .ballon-dor-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      margin-bottom: 2rem;
+      background: linear-gradient(
+        110deg,
+        #7c4a16 0%,
+        #d4af37 25%,
+        #fff4cc 50%,
+        #e5a93b 75%,
+        #7c4a16 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: goldShimmer 4s linear infinite;
+      filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.45));
+    }
+
+    @keyframes goldShimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* Top Controls */
+    .top-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 2rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .player-input {
+      background: #111015;
+      border: 1px solid var(--border-gold);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      width: 210px;
+      outline: none;
+      transition: all 0.25s;
+    }
+
+    .player-input:focus {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 12px var(--glow-gold);
+    }
+
+    .btn-gold-action {
+      background: linear-gradient(135deg, #d4af37, #996515);
+      color: #000;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      box-shadow: 0 0 16px rgba(212, 175, 55, 0.3);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-gold-action:hover {
+      background: linear-gradient(135deg, #fde047, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(250, 204, 21, 0.6);
+    }
+
+    .btn-match-nav {
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--gold-light);
+      border: 1px solid var(--border-gold);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn-match-nav:hover {
+      background: var(--gold-metallic);
+      color: #000;
+      box-shadow: 0 0 22px rgba(250, 204, 21, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-end-season {
+      background: var(--gold-metallic);
+      color: #120e03;
+      border: 1px solid #fef08a;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.92rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.45);
+      transition: all 0.2s;
+    }
+
+    .btn-end-season:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 32px rgba(250, 204, 21, 0.75);
+    }
+
+    .view-section {
+      width: 100%;
+      animation: viewFadeIn 0.35s ease forwards;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Standings Table Card */
+    .table-card {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-gold);
+      border-radius: 18px;
+      padding: 14px 22px 20px 22px;
+      box-shadow: 0 12px 45px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(212, 175, 55, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 10px;
+      text-align: center;
+      font-size: 0.98rem;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+      padding-left: 10px;
+    }
+
+    th {
+      font-weight: 800;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e5e5e5;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .player-profile-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      max-width: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--gold-primary);
+      background-color: #1a1713;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+    .avatar-wrapper:hover {
+      border-color: #fff;
+      transform: scale(1.08);
+      box-shadow: 0 0 16px var(--glow-gold);
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .avatar-fallback {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--gold-primary);
+      user-select: none;
+    }
+
+    .avatar-hover-hint {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .avatar-wrapper:hover .avatar-hover-hint {
+      opacity: 1;
+    }
+
+    .player-name-text {
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .ga-score {
+      font-weight: 900;
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-edit {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      opacity: 0.85;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .btn-edit:hover {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+
+    .btn-del {
+      background: rgba(212, 175, 55, 0.12);
+      color: var(--gold-light);
+      border: 1px solid var(--border-gold);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-del:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.5);
+    }
+
+    .stat-edit-input {
+      width: 48px;
+      background: #1c1a16;
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      text-align: center;
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    /* ==================================================== */
+    /* MATCH RECORDER: DUAL DUGOUTS (HOME & AWAY)           */
+    /* ==================================================== */
+    .match-panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-gold);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 14px 50px rgba(0, 0, 0, 0.7);
+      margin-bottom: 2rem;
+    }
+
+    .match-panel-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .match-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scoreboard-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #111014;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+    }
+
+    .team-entry {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .team-name-input {
+      background: #19181f;
+      border: 1px solid var(--border-gold);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      outline: none;
+      width: 180px;
+      text-align: center;
+    }
+
+    .score-badge-input {
+      width: 56px;
+      height: 48px;
+      background: #000;
+      border: 2px solid var(--gold-bright);
+      color: var(--gold-bright);
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-align: center;
+      border-radius: 10px;
+      outline: none;
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.3);
+    }
+
+    .vs-divider {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--gold-primary);
+      letter-spacing: 2px;
+    }
+
+    .dugout-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 1.8rem;
+    }
+
+    .dugout-col {
+      background: #131217;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dugout-header {
+      font-size: 0.88rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    .dugout-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 110px;
+    }
+
+    .empty-dugout-hint {
+      color: #666;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 30px;
+      font-style: italic;
+    }
+
+    .scorer-card {
+      background: #19181f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .scorer-card:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .scorer-name {
+      font-weight: 800;
+      color: #fff;
+      font-size: 0.88rem;
+    }
+
+    .scorer-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-adjuster {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: #0b0a0e;
+      padding: 2px 5px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-icon-label {
+      font-size: 0.82rem;
+    }
+
+    .btn-stat-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .btn-stat-btn:hover {
+      background: var(--gold-bright);
+      color: #000;
+    }
+
+    .stat-display-num {
+      min-width: 16px;
+      text-align: center;
+      font-weight: 900;
+      color: var(--gold-bright);
+      font-size: 0.85rem;
+    }
+
+    .btn-switch-team {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ccc;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-weight: 800;
+      transition: all 0.2s;
+    }
+    .btn-switch-team:hover {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    .btn-del-opp {
+      background: transparent;
+      border: none;
+      color: #777;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 4px;
+    }
+    .btn-del-opp:hover { color: #ef4444; }
+
+    .quick-add-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .opp-input-sm {
+      flex: 1;
+      background: #111015;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .btn-opp-add {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--border-gold);
+      color: var(--gold-light);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-opp-add:hover {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    /* Real Broadcast Scorecard */
+    .real-match-card {
+      background: #1c1b20;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .match-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+
+    .match-headline {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .match-status-badge {
+      color: #a0a0a0;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .score-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding: 0 16px;
+    }
+
+    .team-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 150px;
+      text-align: center;
+    }
+
+    .team-crest {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2a2930;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .team-display-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .score-center-display {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .score-hyphen {
+      color: #666;
+      font-weight: 300;
+    }
+
+    .scorers-timeline {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: flex-start;
+      gap: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 14px;
+    }
+
+    .scorers-side {
+      font-size: 0.92rem;
+      color: #d1d5db;
+      line-height: 1.7;
+    }
+
+    .scorers-left { text-align: left; }
+    .scorers-right { text-align: right; }
+
+    .scorers-center-icon {
+      font-size: 1rem;
+      color: #aaa;
+      padding-top: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-line-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scorers-left .stat-line-item { justify-content: flex-start; }
+    .scorers-right .stat-line-item { justify-content: flex-end; }
+
+    .boot-icon {
+      font-size: 1rem;
+      filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.4));
+    }
+
+    .btn-delete-match {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: color 0.2s;
+    }
+
+    .btn-delete-match:hover {
+      color: #ef4444;
+    }
+
+    /* Gala Loading Screen */
+    .gala-loader-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #1b160e 0%, #060504 90%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    .gala-loader-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .loader-beams {
+      position: absolute;
+      width: 140vw;
+      height: 140vh;
+      background: conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(250, 204, 21, 0.25) 0deg,
+        transparent 45deg,
+        rgba(212, 175, 55, 0.15) 120deg,
+        transparent 165deg,
+        rgba(250, 204, 21, 0.25) 240deg,
+        transparent 285deg,
+        rgba(212, 175, 55, 0.15) 360deg
+      );
+      animation: rotateBeams 8s linear infinite;
+    }
+
+    .loader-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .spinning-trophy-ring {
+      width: 80px;
+      height: 80px;
+      border: 3px solid rgba(212, 175, 55, 0.2);
+      border-top: 3px solid var(--gold-bright);
+      border-bottom: 3px solid var(--gold-bright);
+      border-radius: 50%;
+      animation: spinRing 1s linear infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+      margin-bottom: 1.2rem;
+      font-size: 1.8rem;
+    }
+
+    @keyframes spinRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loader-title {
+      font-size: 1.15rem;
+      letter-spacing: 4px;
+      color: var(--gold-bright);
+      font-weight: 900;
+      text-transform: uppercase;
+      text-shadow: 0 0 16px rgba(250, 204, 21, 0.7);
+      animation: pulseText 0.7s infinite alternate ease-in-out;
+    }
+
+    /* FC Mobile Pack Overlay (Preserved) */
+    .pack-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #18140c 0%, #050403 90%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      perspective: 1200px;
+      overflow: hidden;
+    }
+
+    .pack-overlay.hidden { display: none; }
+
+    .pack-beams {
+      position: absolute;
+      width: 160vw;
+      height: 160vh;
+      background: conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(250, 204, 21, 0.18) 0deg,
+        transparent 35deg,
+        rgba(180, 130, 40, 0.12) 90deg,
+        transparent 140deg,
+        rgba(250, 204, 21, 0.18) 180deg,
+        transparent 215deg,
+        rgba(180, 130, 40, 0.12) 270deg,
+        transparent 320deg,
+        rgba(250, 204, 21, 0.18) 360deg
+      );
+      animation: rotateBeams 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateBeams {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .pack-scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .pack-prompt {
+      color: var(--gold-light);
+      font-weight: 900;
+      font-size: 1.15rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      text-shadow: 0 0 15px rgba(250, 204, 21, 0.7);
+      animation: pulseText 0.9s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseText {
+      from { opacity: 0.6; transform: translateY(0); }
+      to { opacity: 1; transform: translateY(-4px); }
+    }
+
+    .pack-box {
+      width: 220px;
+      height: 325px;
+      background: linear-gradient(150deg, #241d0e, #0c0a06);
+      border: 3px solid var(--gold-bright);
+      border-radius: 20px;
+      box-shadow: 0 0 45px rgba(250, 204, 21, 0.5), inset 0 0 25px rgba(250, 204, 21, 0.25);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .pack-box:hover {
+      transform: scale(1.06) rotate(1deg);
+      box-shadow: 0 0 60px rgba(250, 204, 21, 0.85);
+    }
+
+    .pack-box::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px dashed rgba(250, 204, 21, 0.5);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .pack-icon-svg {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.8));
+    }
+
+    .pack-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .pack-sub {
+      font-size: 0.7rem;
+      color: #bbb;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    .pack-box.exploding {
+      animation: packRupture 0.85s forwards cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes packRupture {
+      0% { transform: scale(1); filter: brightness(1); }
+      30% { transform: scale(1.15) rotate(-3deg); filter: brightness(2); }
+      60% { transform: scale(1.35) rotate(3deg); filter: brightness(4); }
+      100% { transform: scale(2.4); opacity: 0; visibility: hidden; }
+    }
+
+    .screen-flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999999;
+    }
+
+    .screen-flash.flash-now {
+      animation: triggerFlash 0.5s ease-out;
+    }
+
+    @keyframes triggerFlash {
+      0% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+
+    .reveal-card {
+      width: 280px;
+      background: linear-gradient(135deg, #2e2107 0%, #151006 60%, #3e2d0a 100%);
+      border: 3px solid var(--gold-bright);
+      border-radius: 22px;
+      padding: 24px 20px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      box-shadow: 0 0 60px rgba(250, 204, 21, 0.7), inset 0 0 30px rgba(250, 204, 21, 0.3);
+      animation: walkoutCard 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    .reveal-card.hidden { display: none; }
+
+    @keyframes walkoutCard {
+      0% { transform: scale(0.1) rotateY(270deg); opacity: 0; }
+      100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .card-ovr {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      line-height: 1;
+      text-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+    }
+
+    .card-badge {
+      background: var(--gold-metallic);
+      color: #000;
+      font-weight: 900;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .card-avatar-wrapper {
+      width: 86px;
+      height: 86px;
+      margin: 10px auto;
+      border-radius: 50%;
+      border: 3px solid var(--gold-bright);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
+    }
+
+    .card-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .card-trophy-svg {
+      width: 55px;
+      height: 55px;
+      filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.7));
+    }
+
+    .winner-name {
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      background: var(--gold-metallic);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-container {
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid var(--border-gold);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .ga-highlight {
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      line-height: 1;
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    }
+
+    .ga-label {
+      font-size: 0.68rem;
+      color: var(--gold-light);
+      letter-spacing: 1.5px;
+      margin-top: 5px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .sub-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #999;
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      padding-top: 8px;
+    }
+
+    .sub-stats b { color: #fff; }
+
+    .btn-claim {
+      width: 100%;
+      background: var(--gold-metallic);
+      color: #000;
+      font-weight: 900;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: 0.2s;
+      box-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+    }
+
+    .btn-claim:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.8);
+    }
+
+    /* Completely hide input file element */
+    #hiddenAvatarInput {
+      display: none !important;
+      position: absolute;
+      left: -9999px;
+    }
+
+    @media (max-width: 750px) {
+      .dugout-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen Gala Loader -->
+  <div id="galaLoader" class="gala-loader-overlay">
+    <div class="loader-beams"></div>
+    <div class="loader-content">
+      <div class="spinning-trophy-ring">⚽</div>
+      <div id="loaderMessage" class="loader-title">LOADING MATCH CENTER...</div>
+    </div>
+  </div>
+
+  <!-- Top-Left Ballon d'Or Trophy -->
+  <div class="top-left-trophy" title="France Football Ballon d'Or">
+    <svg class="trophy-svg-container" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="24" r="18" fill="url(#ballGold)" stroke="#ffeeaa" stroke-width="1.5" />
+      <path d="M22 17 Q32 23 42 17" stroke="#996515" stroke-width="1.2" fill="none"/>
+      <path d="M20 27 Q32 35 44 27" stroke="#996515" stroke-width="1.2" fill="none"/>
+      <path d="M26 9 Q32 23 27 39" stroke="#996515" stroke-width="1.2" fill="none"/>
+      <path d="M38 9 Q32 23 37 39" stroke="#996515" stroke-width="1.2" fill="none"/>
+      <path d="M25 42 L39 42 L36 50 L28 50 Z" fill="url(#stemGold)" stroke="#7c4a16" stroke-width="1"/>
+      <rect x="20" y="50" width="24" height="6" rx="2" fill="#1e1810" stroke="#d4af37" stroke-width="1.5"/>
+      <rect x="18" y="56" width="28" height="4" rx="2" fill="#0d0b07" stroke="#8a5a22" stroke-width="1"/>
+      <defs>
+        <radialGradient id="ballGold" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="#fff8cc" />
+          <stop offset="35%" stop-color="#ffd700" />
+          <stop offset="75%" stop-color="#d4af37" />
+          <stop offset="100%" stop-color="#7c4a16" />
+        </radialGradient>
+        <linearGradient id="stemGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ffd700" />
+          <stop offset="100%" stop-color="#8a5a22" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="trophy-text">
+      <span class="trophy-sub-label">Official Gala</span>
+      <span class="trophy-main-label">Ballon d'Or</span>
+    </div>
+  </div>
+
+  <canvas id="particles"></canvas>
+  <div id="screenFlash" class="screen-flash"></div>
+  <input type="file" id="hiddenAvatarInput" accept="image/*" />
+
+  <div class="main-wrapper">
+    <h1 class="ballon-dor-title">Who Will Be The Ballon d'Or Winner?</h1>
+
+    <!-- VIEW 1: STANDINGS / G/A LEADERBOARD -->
+    <div id="standingsView" class="view-section">
+      <div class="top-controls">
+        <input type="text" id="playerNameInput" class="player-input" placeholder="Player Name" />
+        <button id="addPlayerBtn" class="btn-gold-action">+ Add Player</button>
+        <button id="openMatchCenterBtn" class="btn-match-nav">⚽ Match Center</button>
+        <button id="endSeasonBtn" class="btn-end-season">🏆 End Season</button>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Goals</th>
+              <th>Assists</th>
+              <th>G/A</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="playerTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 2: DUAL-DUGOUT MATCH RECORDER -->
+    <div id="matchCenterView" class="view-section hidden">
+      <div class="match-panel-card">
+        <div class="match-panel-top-bar">
+          <div class="match-title">⚽ MATCH RECORDER</div>
+          <button id="backToStandingsBtn" class="btn-match-nav">⬅ Back to Standings</button>
+        </div>
+
+        <form id="matchForm">
+          <div class="scoreboard-box">
+            <div class="team-entry">
+              <input type="text" id="homeTeamName" class="team-name-input" value="Squad FC" oninput="updateTeamLabels()" required />
+              <input type="number" id="homeTeamScore" class="score-badge-input" value="0" min="0" required />
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <div class="team-entry">
+              <input type="number" id="awayTeamScore" class="score-badge-input" value="0" min="0" required />
+              <input type="text" id="awayTeamName" class="team-name-input" placeholder="Opponent Name" oninput="updateTeamLabels()" required />
+            </div>
+          </div>
+
+          <div class="dugout-container">
+            <!-- Home Team Dugout -->
+            <div class="dugout-col">
+              <div class="dugout-header">
+                <span id="labelTeamA">🛡️ Squad FC Lineup</span>
+                <span style="font-size:0.75rem; color:#888;">(Home)</span>
+              </div>
+              <div id="teamAList" class="dugout-list"></div>
+              
+              <div class="quick-add-box">
+                <input type="text" id="customPlayerHome" class="opp-input-sm" placeholder="Add player to Home..." />
+                <button type="button" class="btn-opp-add" onclick="addCustomPlayer('A')">+ Add</button>
+              </div>
+            </div>
+
+            <!-- Away Team Dugout -->
+            <div class="dugout-col">
+              <div class="dugout-header">
+                <span id="labelTeamB">⚔️ Opponent Lineup</span>
+                <span style="font-size:0.75rem; color:#888;">(Away)</span>
+              </div>
+              <div id="teamBList" class="dugout-list"></div>
+
+              <div class="quick-add-box">
+                <input type="text" id="customPlayerAway" class="opp-input-sm" placeholder="Add player to Away..." />
+                <button type="button" class="btn-opp-add" onclick="addCustomPlayer('B')">+ Add</button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-gold-action" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem;">
+            💾 Save Match Score
+          </button>
+        </form>
+      </div>
+
+      <!-- Real Match Score Feed -->
+      <div class="match-panel-card">
+        <div class="match-title" style="margin-bottom: 1.5rem; font-size: 1.2rem;">📺 Match Results</div>
+        <div id="realMatchList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FC Mobile Pack Opening Modal -->
+  <div id="packOverlay" class="pack-overlay hidden">
+    <div class="pack-beams"></div>
+    <div class="pack-scene">
+      <div id="packPrompt" class="pack-prompt">TAP PACK TO OPEN</div>
+
+      <div id="packBox" class="pack-box">
+        <svg class="pack-icon-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="24" r="18" fill="url(#packBallGold)" stroke="#ffeeaa" stroke-width="1.5" />
+          <path d="M22 17 Q32 23 42 17" stroke="#8a5a22" stroke-width="1.2" fill="none"/>
+          <path d="M20 27 Q32 35 44 27" stroke="#8a5a22" stroke-width="1.2" fill="none"/>
+          <path d="M26 9 Q32 23 27 39" stroke="#8a5a22" stroke-width="1.2" fill="none"/>
+          <path d="M38 9 Q32 23 37 39" stroke="#8a5a22" stroke-width="1.2" fill="none"/>
+          <path d="M25 42 L39 42 L36 50 L28 50 Z" fill="#d4af37" stroke="#7c4a16" stroke-width="1"/>
+          <rect x="20" y="50" width="24" height="6" rx="2" fill="#1e1810" stroke="#ffd700" stroke-width="1.5"/>
+          <defs>
+            <radialGradient id="packBallGold" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#fff8cc" />
+              <stop offset="35%" stop-color="#ffd700" />
+              <stop offset="75%" stop-color="#d4af37" />
+              <stop offset="100%" stop-color="#7c4a16" />
+            </radialGradient>
+          </defs>
+        </svg>
+        <div class="pack-title">BALLON D'OR</div>
+        <div class="pack-sub">GALA WINNER</div>
+      </div>
+
+      <div id="revealCard" class="reveal-card hidden">
+        <div class="card-top">
+          <div class="card-ovr" id="winnerOvr">99</div>
+          <div class="card-badge">BALLON D'OR</div>
+        </div>
+        
+        <div class="card-avatar-wrapper" id="winnerAvatarWrap"></div>
+
+        <h2 id="winnerName" class="winner-name">Player Name</h2>
+        
+        <div class="stat-container">
+          <div class="ga-highlight" id="winnerGA">0</div>
+          <div class="ga-label">TOTAL CONTRIBUTIONS (G/A)</div>
+          <div class="sub-stats">
+            <span>Goals: <b id="winnerGoals">0</b></span>
+            <span>Assists: <b id="winnerAssists">0</b></span>
+          </div>
+        </div>
+
+        <button id="closePackBtn" class="btn-claim">Claim Trophy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. DATA INITIALIZATION & STORAGE
+    // ==========================================
+    const PLAYERS_KEY = "ballondor_players_data_v9";
+    const MATCHES_KEY = "ballondor_matches_data_v9";
+
+    let players = JSON.parse(localStorage.getItem(PLAYERS_KEY)) || [
+      { id: "1", name: "Jayant", goals: 6, assists: 9, avatar: "" },
+      { id: "2", name: "Devansh", goals: 4, assists: 5, avatar: "" },
+      { id: "3", name: "Daniyal", goals: 8, assists: 1, avatar: "" },
+      { id: "4", name: "Namith", goals: 4, assists: 5, avatar: "" },
+      { id: "5", name: "Namish", goals: 5, assists: 3, avatar: "" },
+      { id: "6", name: "Mufeed", goals: 3, assists: 3, avatar: "" }
+    ];
+
+    let matches = JSON.parse(localStorage.getItem(MATCHES_KEY)) || [
+      {
+        id: "m_sample",
+        homeTeam: "Barcelona",
+        awayTeam: "Feyenoord",
+        homeScore: 5,
+        awayScore: 1,
+        homeGoals: ["Raphinha", "Karim Adeyemi", "Lamine Yamal", "Gabriel Jesus"],
+        homeAssists: ["Pedri", "Lamine Yamal"],
+        awayGoals: ["Sem Steijn"],
+        awayAssists: []
+      }
+    ];
+
+    let editingId = null;
+    let selectedPlayerIdForAvatar = null;
+
+    let dugoutAssignments = {};
+    let matchPicks = {};
+    let customMatchPlayers = [];
+
+    function savePlayers() {
+      localStorage.setItem(PLAYERS_KEY, JSON.stringify(players));
+      renderTable();
+    }
+
+    function saveMatches() {
+      localStorage.setItem(MATCHES_KEY, JSON.stringify(matches));
+      renderRealMatchCards();
+    }
+
+    // ==========================================
+    // 2. VIEW SWITCHING & LOADING SCREEN
+    // ==========================================
+    const standingsView = document.getElementById("standingsView");
+    const matchCenterView = document.getElementById("matchCenterView");
+    const galaLoader = document.getElementById("galaLoader");
+    const loaderMessage = document.getElementById("loaderMessage");
+
+    function switchView(targetView, msg) {
+      loaderMessage.textContent = msg;
+      galaLoader.classList.add("active");
+
+      setTimeout(() => {
+        if (targetView === "matchCenter") {
+          standingsView.classList.add("hidden");
+          matchCenterView.classList.remove("hidden");
+          initDugouts();
+          renderRealMatchCards();
+        } else {
+          matchCenterView.classList.add("hidden");
+          standingsView.classList.remove("hidden");
+          renderTable();
+        }
+
+        setTimeout(() => {
+          galaLoader.classList.remove("active");
+        }, 250);
+      }, 700);
+    }
+
+    document.getElementById("openMatchCenterBtn").addEventListener("click", () => {
+      switchView("matchCenter", "ENTERING MATCH CENTER...");
+    });
+
+    document.getElementById("backToStandingsBtn").addEventListener("click", () => {
+      switchView("standings", "LOADING BALLON D'OR STANDINGS...");
+    });
+
+    function updateTeamLabels() {
+      const hName = document.getElementById("homeTeamName").value.trim() || "Home";
+      const aName = document.getElementById("awayTeamName").value.trim() || "Away";
+      document.getElementById("labelTeamA").textContent = `🛡️ ${hName}`;
+      document.getElementById("labelTeamB").textContent = `⚔️ ${aName}`;
+    }
+
+    // ==========================================
+    // 3. STANDINGS TABLE (Independent of matches)
+    // ==========================================
+    function renderTable() {
+      const tbody = document.getElementById("playerTableBody");
+      tbody.innerHTML = "";
+
+      players.sort((a, b) => {
+        const gaA = (Number(a.goals) || 0) + (Number(a.assists) || 0);
+        const gaB = (Number(b.goals) || 0) + (Number(b.assists) || 0);
+        return gaB - gaA;
+      });
+
+      players.forEach((player) => {
+        const goals = Number(player.goals) || 0;
+        const assists = Number(player.assists) || 0;
+        const ga = goals + assists;
+        const isEditing = editingId === player.id;
+        const firstLetter = player.name ? player.name.charAt(0).toUpperCase() : "?";
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>
+            <div class="player-profile-cell">
+              <div class="avatar-wrapper" onclick="triggerAvatarUpload('${player.id}')" title="Click to upload photo">
+                ${
+                  player.avatar 
+                    ? `<img src="${player.avatar}" alt="${player.name}" class="avatar-img" />` 
+                    : `<span class="avatar-fallback">${firstLetter}</span>`
+                }
+                <div class="avatar-hover-hint">📷</div>
+              </div>
+              <span class="player-name-text">${player.name}</span>
+            </div>
+          </td>
+          <td>
+            ${isEditing 
+              ? `<input type="number" class="stat-edit-input" id="edit-g-${player.id}" value="${goals}" min="0">` 
+              : goals}
+          </td>
+          <td>
+            ${isEditing 
+              ? `<input type="number" class="stat-edit-input" id="edit-a-${player.id}" value="${assists}" min="0">` 
+              : assists}
+          </td>
+          <td class="ga-score">${ga}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-edit" onclick="toggleEdit('${player.id}')" title="Edit Stats">
+                ${isEditing ? '💾' : '✏️'}
+              </button>
+              <button class="btn-del" onclick="deletePlayer('${player.id}')">Del</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ==========================================
+    // 4. DUAL DUGOUT LOGIC WITH FREE TEAM SWITCHING
+    // ==========================================
+    function initDugouts() {
+      players.forEach(p => {
+        if (!dugoutAssignments[p.id]) dugoutAssignments[p.id] = 'A';
+        if (!matchPicks[p.id]) matchPicks[p.id] = { goals: 0, assists: 0, name: p.name };
+      });
+      renderDugouts();
+    }
+
+    function renderDugouts() {
+      const listA = document.getElementById("teamAList");
+      const listB = document.getElementById("teamBList");
+      listA.innerHTML = "";
+      listB.innerHTML = "";
+
+      let countA = 0;
+      let countB = 0;
+
+      // Render tracked squad players
+      players.forEach(p => {
+        const team = dugoutAssignments[p.id] || 'A';
+        const card = createDugoutCard(p.id, p.name, team, false);
+        if (team === 'A') {
+          listA.appendChild(card);
+          countA++;
+        } else {
+          listB.appendChild(card);
+          countB++;
+        }
+      });
+
+      // Render custom extra match players
+      customMatchPlayers.forEach(p => {
+        const team = dugoutAssignments[p.id] || 'B';
+        const card = createDugoutCard(p.id, p.name, team, true);
+        if (team === 'A') {
+          listA.appendChild(card);
+          countA++;
+        } else {
+          listB.appendChild(card);
+          countB++;
+        }
+      });
+
+      if (countA === 0) listA.innerHTML = `<div class="empty-dugout-hint">No players assigned to Home.</div>`;
+      if (countB === 0) listB.innerHTML = `<div class="empty-dugout-hint">No players assigned to Away.</div>`;
+
+      recalculateScores();
+    }
+
+    function createDugoutCard(id, name, currentTeam, isCustom) {
+      const card = document.createElement("div");
+      card.className = "scorer-card";
+
+      const picks = matchPicks[id] || { goals: 0, assists: 0 };
+      const nextTeamName = (currentTeam === 'A') ? 'Away ➔' : '➔ Home';
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="btn-switch-team" onclick="togglePlayerTeam('${id}')" title="Move player between Home and Away">
+            ${nextTeamName}
+          </button>
+          <span class="scorer-name">${name}</span>
+          ${isCustom ? `<button type="button" class="btn-del-opp" onclick="removeCustomPlayer('${id}')" title="Remove">✕</button>` : ''}
+        </div>
+        <div class="scorer-controls">
+          <div class="stat-adjuster">
+            <span class="stat-icon-label">⚽</span>
+            <button type="button" class="btn-stat-btn" onclick="adjustDugoutStat('${id}', 'goals', -1)">-</button>
+            <span class="stat-display-num" id="dg-g-${id}">${picks.goals}</span>
+            <button type="button" class="btn-stat-btn" onclick="adjustDugoutStat('${id}', 'goals', 1)">+</button>
+          </div>
+          <div class="stat-adjuster">
+            <span class="stat-icon-label boot-icon">🥾</span>
+            <button type="button" class="btn-stat-btn" onclick="adjustDugoutStat('${id}', 'assists', -1)">-</button>
+            <span class="stat-display-num" id="dg-a-${id}">${picks.assists}</span>
+            <button type="button" class="btn-stat-btn" onclick="adjustDugoutStat('${id}', 'assists', 1)">+</button>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    window.togglePlayerTeam = function(id) {
+      dugoutAssignments[id] = (dugoutAssignments[id] === 'A') ? 'B' : 'A';
+      renderDugouts();
+    };
+
+    window.adjustDugoutStat = function(id, type, delta) {
+      if (!matchPicks[id]) {
+        const found = players.find(p => p.id === id) || customMatchPlayers.find(o => o.id === id);
+        matchPicks[id] = { goals: 0, assists: 0, name: found ? found.name : 'Player' };
+      }
+
+      matchPicks[id][type] = Math.max(0, matchPicks[id][type] + delta);
+      document.getElementById(`dg-${type === 'goals' ? 'g' : 'a'}-${id}`).textContent = matchPicks[id][type];
+      recalculateScores();
+    };
+
+    function recalculateScores() {
+      let homeGoals = 0;
+      let awayGoals = 0;
+
+      [...players, ...customMatchPlayers].forEach(p => {
+        const stats = matchPicks[p.id];
+        if (stats) {
+          if (dugoutAssignments[p.id] === 'A') homeGoals += stats.goals;
+          else awayGoals += stats.goals;
+        }
+      });
+
+      document.getElementById("homeTeamScore").value = homeGoals;
+      document.getElementById("awayTeamScore").value = awayGoals;
+    }
+
+    window.addCustomPlayer = function(targetTeam) {
+      const inputId = (targetTeam === 'A') ? 'customPlayerHome' : 'customPlayerAway';
+      const input = document.getElementById(inputId);
+      const name = input.value.trim();
+      if (!name) return;
+
+      const newId = "custom_" + Date.now();
+      customMatchPlayers.push({ id: newId, name });
+      dugoutAssignments[newId] = targetTeam;
+      matchPicks[newId] = { goals: 0, assists: 0, name };
+
+      input.value = "";
+      renderDugouts();
+    };
+
+    window.removeCustomPlayer = function(id) {
+      customMatchPlayers = customMatchPlayers.filter(p => p.id !== id);
+      delete dugoutAssignments[id];
+      delete matchPicks[id];
+      renderDugouts();
+    };
+
+    // Save Match Score (DOES NOT MODIFY LEADERBOARD G/A TABLE)
+    document.getElementById("matchForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const homeTeam = document.getElementById("homeTeamName").value.trim() || "Squad FC";
+      const awayTeam = document.getElementById("awayTeamName").value.trim() || "Opponent";
+      const homeScore = parseInt(document.getElementById("homeTeamScore").value) || 0;
+      const awayScore = parseInt(document.getElementById("awayTeamScore").value) || 0;
+
+      const homeGoals = [];
+      const homeAssists = [];
+      const awayGoals = [];
+      const awayAssists = [];
+
+      [...players, ...customMatchPlayers].forEach(p => {
+        const stats = matchPicks[p.id];
+        if (stats) {
+          const isHome = dugoutAssignments[p.id] === 'A';
+          for (let i = 0; i < stats.goals; i++) (isHome ? homeGoals : awayGoals).push(p.name);
+          for (let i = 0; i < stats.assists; i++) (isHome ? homeAssists : awayAssists).push(p.name);
+        }
+      });
+
+      matches.unshift({
+        id: Date.now().toString(),
+        homeTeam,
+        awayTeam,
+        homeScore,
+        awayScore,
+        homeGoals,
+        homeAssists,
+        awayGoals,
+        awayAssists
+      });
+
+      matchPicks = {};
+      customMatchPlayers = [];
+      dugoutAssignments = {};
+      initDugouts();
+
+      saveMatches();
+      alert("Match score recorded! (Leaderboard G/A remained untouched).");
+    });
+
+    // ==========================================
+    // 5. GOOGLE MATCH DISPLAY CARD
+    // ==========================================
+    function renderRealMatchCards() {
+      const container = document.getElementById("realMatchList");
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (matches.length === 0) {
+        container.innerHTML = `<p style="color:#777; text-align:center; padding: 2rem;">No matches recorded yet.</p>`;
+        return;
+      }
+
+      matches.forEach(m => {
+        const homeGoalLines = aggregateList(m.homeGoals || []).map(item => `<div class="stat-line-item"><span>⚽</span> <b>${item}</b></div>`);
+        const homeAssistLines = aggregateList(m.homeAssists || []).map(item => `<div class="stat-line-item"><span class="boot-icon">🥾</span> <span>${item}</span></div>`);
+        
+        const awayGoalLines = aggregateList(m.awayGoals || []).map(item => `<div class="stat-line-item"><b>${item}</b> <span>⚽</span></div>`);
+        const awayAssistLines = aggregateList(m.awayAssists || []).map(item => `<div class="stat-line-item"><span>${item}</span> <span class="boot-icon">🥾</span></div>`);
+
+        const card = document.createElement("div");
+        card.className = "real-match-card";
+        card.innerHTML = `
+          <button class="btn-delete-match" onclick="deleteMatchRecord('${m.id}')" title="Delete Match">✕</button>
+          
+          <div class="match-header-row">
+            <span class="match-headline">${m.homeTeam} vs ${m.awayTeam}</span>
+            <span class="match-status-badge">Full-time</span>
+          </div>
+
+          <div class="score-banner">
+            <div class="team-col">
+              <div class="team-crest">🛡️</div>
+              <div class="team-display-name">${m.homeTeam}</div>
+            </div>
+
+            <div class="score-center-display">
+              <span>${m.homeScore}</span>
+              <span class="score-hyphen">-</span>
+              <span>${m.awayScore}</span>
+            </div>
+
+            <div class="team-col">
+              <div class="team-crest">⚔️</div>
+              <div class="team-display-name">${m.awayTeam}</div>
+            </div>
+          </div>
+
+          <div class="scorers-timeline">
+            <div class="scorers-side scorers-left">
+              ${homeGoalLines.length > 0 || homeAssistLines.length > 0 
+                ? [...homeGoalLines, ...homeAssistLines].join("") 
+                : "<span style='color:#555;'>—</span>"}
+            </div>
+
+            <div class="scorers-center-icon">
+              <span>⚽</span>
+              <span class="boot-icon">🥾</span>
+            </div>
+
+            <div class="scorers-side scorers-right">
+              ${awayGoalLines.length > 0 || awayAssistLines.length > 0 
+                ? [...awayGoalLines, ...awayAssistLines].join("") 
+                : "<span style='color:#555;'>—</span>"}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function aggregateList(namesArray) {
+      const counts = {};
+      namesArray.forEach(name => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+
+      return Object.keys(counts).map(name => {
+        return counts[name] > 1 ? `${name} (${counts[name]})` : name;
+      });
+    }
+
+    window.deleteMatchRecord = function(id) {
+      if (confirm("Delete this match record?")) {
+        matches = matches.filter(m => m.id !== id);
+        saveMatches();
+      }
+    };
+
+    // ==========================================
+    // 6. AVATAR UPLOADER
+    // ==========================================
+    const hiddenAvatarInput = document.getElementById("hiddenAvatarInput");
+
+    window.triggerAvatarUpload = function(id) {
+      selectedPlayerIdForAvatar = id;
+      hiddenAvatarInput.value = "";
+      hiddenAvatarInput.click();
+    };
+
+    hiddenAvatarInput.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file || !selectedPlayerIdForAvatar) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const size = 180;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+
+          const minDim = Math.min(img.width, img.height);
+          const startX = (img.width - minDim) / 2;
+          const startY = (img.height - minDim) / 2;
+
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, size, size);
+          const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+          const player = players.find(p => p.id === selectedPlayerIdForAvatar);
+          if (player) {
+            player.avatar = croppedDataUrl;
+            savePlayers();
+          }
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Add Player (Leaderboard)
+    document.getElementById("addPlayerBtn").addEventListener("click", () => {
+      const input = document.getElementById("playerNameInput");
+      const name = input.value.trim();
+      if (!name) return;
+
+      players.push({
+        id: Date.now().toString(),
+        name: name,
+        goals: 0,
+        assists: 0,
+        avatar: ""
+      });
+
+      input.value = "";
+      savePlayers();
+    });
+
+    document.getElementById("playerNameInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") document.getElementById("addPlayerBtn").click();
+    });
+
+    // Inline Edit / Delete Players
+    window.toggleEdit = function(id) {
+      if (editingId === id) {
+        const gInput = document.getElementById(`edit-g-${id}`);
+        const aInput = document.getElementById(`edit-a-${id}`);
+        const player = players.find(p => p.id === id);
+        if (player && gInput && aInput) {
+          player.goals = parseInt(gInput.value) || 0;
+          player.assists = parseInt(aInput.value) || 0;
+        }
+        editingId = null;
+        savePlayers();
+      } else {
+        editingId = id;
+        renderTable();
+      }
+    };
+
+    window.deletePlayer = function(id) {
+      if (confirm("Remove this player from the Ballon d'Or race?")) {
+        players = players.filter(p => p.id !== id);
+        if (editingId === id) editingId = null;
+        savePlayers();
+      }
+    };
+
+    // ==========================================
+    // 7. FC MOBILE BALLON D'OR PACK OPENING
+    // ==========================================
+    const endSeasonBtn = document.getElementById("endSeasonBtn");
+    const packOverlay = document.getElementById("packOverlay");
+    const packBox = document.getElementById("packBox");
+    const packPrompt = document.getElementById("packPrompt");
+    const revealCard = document.getElementById("revealCard");
+    const screenFlash = document.getElementById("screenFlash");
+    const closePackBtn = document.getElementById("closePackBtn");
+
+    let topPlayer = null;
+
+    endSeasonBtn.addEventListener("click", () => {
+      if (players.length === 0) {
+        alert("Add player stats first!");
+        return;
+      }
+
+      topPlayer = players[0];
+
+      packBox.classList.remove("exploding");
+      packBox.style.display = "flex";
+      revealCard.classList.add("hidden");
+      packPrompt.style.display = "block";
+
+      packOverlay.classList.remove("hidden");
+    });
+
+    packBox.addEventListener("click", () => {
+      packPrompt.style.display = "none";
+      packBox.classList.add("exploding");
+
+      setTimeout(() => {
+        screenFlash.classList.add("flash-now");
+        setTimeout(() => screenFlash.classList.remove("flash-now"), 500);
+      }, 500);
+
+      setTimeout(() => {
+        packBox.style.display = "none";
+
+        const goals = Number(topPlayer.goals) || 0;
+        const assists = Number(topPlayer.assists) || 0;
+        const ga = goals + assists;
+
+        document.getElementById("winnerName").textContent = topPlayer.name;
+        document.getElementById("winnerGA").textContent = ga;
+        document.getElementById("winnerGoals").textContent = goals;
+        document.getElementById("winnerAssists").textContent = assists;
+        
+        const avatarWrap = document.getElementById("winnerAvatarWrap");
+        if (topPlayer.avatar) {
+          avatarWrap.innerHTML = `<img src="${topPlayer.avatar}" alt="${topPlayer.name}" class="card-avatar-img" />`;
+        } else {
+          avatarWrap.innerHTML = `
+            <svg class="card-trophy-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="24" r="18" fill="url(#cardBallGold)" stroke="#ffeeaa" stroke-width="1.5" />
+              <path d="M22 17 Q32 23 42 17" stroke="#7c4a16" stroke-width="1.2" fill="none"/>
+              <path d="M20 27 Q32 35 44 27" stroke="#7c4a16" stroke-width="1.2" fill="none"/>
+              <path d="M25 42 L39 42 L36 50 L28 50 Z" fill="#d4af37" stroke="#7c4a16" stroke-width="1"/>
+              <rect x="20" y="50" width="24" height="6" rx="2" fill="#1e1810" stroke="#ffd700" stroke-width="1.5"/>
+              <defs>
+                <radialGradient id="cardBallGold" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#fff8cc" />
+                  <stop offset="35%" stop-color="#ffd700" />
+                  <stop offset="75%" stop-color="#d4af37" />
+                  <stop offset="100%" stop-color="#7c4a16" />
+                </radialGradient>
+              </defs>
+            </svg>
+          `;
+        }
+
+        const ovr = Math.min(99, 84 + ga);
+        document.getElementById("winnerOvr").textContent = ovr;
+
+        revealCard.classList.remove("hidden");
+      }, 750);
+    });
+
+    closePackBtn.addEventListener("click", () => {
+      packOverlay.classList.add("hidden");
+    });
+
+    // ==========================================
+    // 8. GOLD PARTICLES CANVAS
+    // ==========================================
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const particlesArray = [];
+    for (let i = 0; i < 45; i++) {
+      particlesArray.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 3.5 + 1.2,
+        speedX: (Math.random() - 0.5) * 0.35,
+        speedY: (Math.random() - 0.5) * 0.35,
+        alpha: Math.random() * 0.45 + 0.15
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesArray.forEach(p => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(250, 204, 21, ${p.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "rgba(250, 204, 21, 0.6)";
+        ctx.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Initial render
+    renderTable();
+  </script>
+</body>
+</html>
