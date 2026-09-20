@@ -626,6 +626,65 @@
       opacity: 1;
     }
 
+    /* Podium Crown Badges on PFP */
+    .podium-crown {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.1rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+      z-index: 5;
+      animation: crownBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes crownBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-2px); }
+    }
+
+    /* Overtake Cinematic Banner Animation */
+    .overtake-banner {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      background: linear-gradient(135deg, rgba(30, 24, 8, 0.95), rgba(60, 45, 10, 0.95));
+      border: 3px solid var(--gold-bright);
+      box-shadow: 0 0 50px rgba(250, 204, 21, 0.8), inset 0 0 25px rgba(250, 204, 21, 0.4);
+      padding: 18px 40px;
+      border-radius: 20px;
+      text-align: center;
+      z-index: 999999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .overtake-banner.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .overtake-sub {
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .overtake-main {
+      font-size: 1.6rem;
+      font-weight: 900;
+      background: var(--gold-metallic);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
     .player-name-text {
       font-weight: 700;
       color: #fff;
@@ -1482,6 +1541,12 @@
     </div>
   </div>
 
+  <!-- Overtake Cinematic Banner -->
+  <div id="overtakeBanner" class="overtake-banner">
+    <div class="overtake-sub">👑 NEW TABLE LEADER! 👑</div>
+    <div id="overtakeText" class="overtake-main">Player Name Takes 1st!</div>
+  </div>
+
   <!-- Top-Left Ballon d'Or Trophy -->
   <div class="top-left-trophy" title="France Football Ballon d'Or">
     <svg class="trophy-svg-container" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1550,9 +1615,13 @@
       </div>
     </div>
 
-    <!-- HTML5 Audio linked to local filenames -->
+    <!-- HTML5 Audio elements -->
     <audio id="fifaAudio" preload="auto" loop>
       <source id="audioSource" src="daidai.mp3" type="audio/mp3">
+    </audio>
+
+    <audio id="packAudio" preload="auto">
+      <source src="packsound.mp3" type="audio/mp3">
     </audio>
 
     <!-- VIEW 0: LOGIN PORTAL -->
@@ -1725,7 +1794,7 @@
 
   <script>
     // ==========================================
-    // 0. LOCAL 7-SONG AUDIO PLAYER
+    // 0. LOCAL AUDIO PLAYER & PACK SOUND
     // ==========================================
     const playlist = [
       { title: "Dai Dai", url: "daidai.mp3" },
@@ -1740,11 +1809,13 @@
     let currentSongIdx = 0;
     const audioElem = document.getElementById("fifaAudio");
     const audioSource = document.getElementById("audioSource");
+    const packAudio = document.getElementById("packAudio");
     const songSelector = document.getElementById("songSelector");
     const nowPlayingTitle = document.getElementById("nowPlayingTitle");
     const playPauseBtn = document.getElementById("playPauseBtn");
 
     audioElem.volume = 0.7;
+    packAudio.volume = 0.9;
 
     function togglePlayMusic() {
       if (audioElem.paused) {
@@ -1889,6 +1960,7 @@
     // ==========================================
     let players = [];
     let matches = [];
+    let previousFirstPlaceId = null; // Track leader changes for overtake animation
 
     let editingId = null;
     let selectedPlayerIdForAvatar = null;
@@ -1912,6 +1984,9 @@
           ];
           defaults.forEach(p => playersRef.child(p.id).set(p));
         }
+
+        // Check for 1st place leader overtake
+        checkForOvertake();
         renderTable();
       });
     }
@@ -1927,6 +2002,34 @@
         }
         renderRealMatchCards();
       });
+    }
+
+    function checkForOvertake() {
+      if (players.length === 0) return;
+      // Sort players by G/A
+      const sorted = [...players].sort((a, b) => {
+        const gaA = (Number(a.goals) || 0) + (Number(a.assists) || 0);
+        const gaB = (Number(b.goals) || 0) + (Number(b.assists) || 0);
+        return gaB - gaA;
+      });
+
+      const currentFirst = sorted[0];
+      if (previousFirstPlaceId !== null && previousFirstPlaceId !== currentFirst.id) {
+        // Trigger Overtake Cinematic Animation!
+        triggerOvertakeAnimation(currentFirst.name);
+      }
+      previousFirstPlaceId = currentFirst.id;
+    }
+
+    function triggerOvertakeAnimation(winnerName) {
+      const banner = document.getElementById("overtakeBanner");
+      const text = document.getElementById("overtakeText");
+      text.textContent = `${winnerName} Takes 1st Place!`;
+      banner.classList.add("show");
+
+      setTimeout(() => {
+        banner.classList.remove("show");
+      }, 3500);
     }
 
     function syncPlayerToDb(player) {
@@ -2001,7 +2104,7 @@
     }
 
     // ==========================================
-    // 5. STANDINGS TABLE
+    // 5. STANDINGS TABLE (With Podium Badges)
     // ==========================================
     function renderTable() {
       const tbody = document.getElementById("playerTableBody");
@@ -2015,18 +2118,25 @@
 
       const isAdmin = (currentUserRole === 'admin');
 
-      players.forEach((player) => {
+      players.forEach((player, index) => {
         const goals = Number(player.goals) || 0;
         const assists = Number(player.assists) || 0;
         const ga = goals + assists;
         const isEditing = editingId === player.id;
         const firstLetter = player.name ? player.name.charAt(0).toUpperCase() : "?";
 
+        // Determine crown badge for top 3
+        let crownBadge = "";
+        if (index === 0) crownBadge = `<div class="podium-crown" title="1st Place Leader">👑</div>`;
+        else if (index === 1) crownBadge = `<div class="podium-crown" title="2nd Place">🥈</div>`;
+        else if (index === 2) crownBadge = `<div class="podium-crown" title="3rd Place">🥉</div>`;
+
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>
             <div class="player-profile-cell">
               <div class="avatar-wrapper" onclick="${isAdmin ? `triggerAvatarUpload('${player.id}')` : ''}" title="${isAdmin ? 'Click to upload photo' : ''}">
+                ${crownBadge}
                 ${
                   player.avatar 
                     ? `<img src="${player.avatar}" alt="${player.name}" class="avatar-img" />` 
@@ -2431,7 +2541,7 @@
     };
 
     // ==========================================
-    // 9. FC MOBILE BALLON D'OR PACK OPENING (Auto-Stops Music)
+    // 9. FC MOBILE BALLON D'OR PACK OPENING
     // ==========================================
     const endSeasonBtn = document.getElementById("endSeasonBtn");
     const packOverlay = document.getElementById("packOverlay");
@@ -2449,12 +2559,6 @@
         return;
       }
 
-      // Automatically pause any playing music when End Season is clicked
-      if (!audioElem.paused) {
-        audioElem.pause();
-        playPauseBtn.textContent = "▶";
-      }
-
       topPlayer = players[0];
 
       packBox.classList.remove("exploding");
@@ -2468,6 +2572,10 @@
     packBox.addEventListener("click", () => {
       packPrompt.style.display = "none";
       packBox.classList.add("exploding");
+
+      // Play custom pack opening sound effect while background music keeps playing!
+      packAudio.currentTime = 0;
+      packAudio.play().catch(err => console.log("Pack SFX play error:", err));
 
       setTimeout(() => {
         screenFlash.classList.add("flash-now");
