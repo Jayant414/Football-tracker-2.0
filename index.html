@@ -1525,30 +1525,31 @@
   <div class="main-wrapper">
     <h1 class="ballon-dor-title">Who Will Be The Ballon d'Or Winner?</h1>
 
-    <!-- 3-Song Local Music Player Banner -->
+    <!-- 4-Song Local Music Player Banner -->
     <div class="fifa-music-banner">
       <div class="music-info-box">
         <div class="music-vinyl-icon">🎵</div>
         <div class="music-details">
-          <span id="nowPlayingTitle" class="music-title-text">Dai Dai</span>
+          <span id="nowPlayingTitle" class="music-title-text">Heat Waves</span>
           <span class="music-artist-text">Anthem Player</span>
         </div>
       </div>
 
       <div class="music-controls">
         <select id="songSelector" class="music-select" onchange="changeSong()">
-          <option value="0">Dai Dai</option>
-          <option value="1">Wavin' Flag</option>
-          <option value="2">France Vibe</option>
+          <option value="0">Heat Waves</option>
+          <option value="1">Waka Waka</option>
+          <option value="2">House of Memories</option>
+          <option value="3">Feet Don't Fail Me Now</option>
         </select>
         <button id="playPauseBtn" class="btn-music-ctrl" onclick="togglePlayMusic()" title="Play/Pause">▶</button>
         <button class="btn-music-ctrl" onclick="nextSong()" title="Next Song">⏭</button>
       </div>
     </div>
 
-    <!-- HTML5 Audio linked to local filenames -->
+    <!-- HTML5 Audio linked to your 4 local filenames -->
     <audio id="fifaAudio" preload="auto" loop>
-      <source id="audioSource" src="daidai.mp3" type="audio/mp3">
+      <source id="audioSource" src="heatwaves.mp3" type="audio/mp3">
     </audio>
 
     <!-- VIEW 0: LOGIN PORTAL -->
@@ -1721,12 +1722,13 @@
 
   <script>
     // ==========================================
-    // 0. LOCAL 3-SONG AUDIO PLAYER
+    // 0. LOCAL 4-SONG AUDIO PLAYER
     // ==========================================
     const playlist = [
-      { title: "Dai Dai", url: "daidai.mp3" },
-      { title: "Wavin' Flag", url: "wavingflag.mp3" },
-      { title: "France Vibe", url: "francevibe.mp3" }
+      { title: "Heat Waves", url: "heatwaves.mp3" },
+      { title: "Waka Waka", url: "wakawaka.mp3" },
+      { title: "House of Memories", url: "houseofmemories.mp3" },
+      { title: "Feet Don't Fail Me Now", url: "feetdontfailmenow.mp3" }
     ];
 
     let currentSongIdx = 0;
@@ -2423,7 +2425,7 @@
     };
 
     // ==========================================
-    // 9. FC MOBILE BALLON D'OR PACK OPENING
+    // 9. FC MOBILE BALLON D'OR PACK OPENING (Auto-Stops Music)
     // ==========================================
     const endSeasonBtn = document.getElementById("endSeasonBtn");
     const packOverlay = document.getElementById("packOverlay");
@@ -2439,6 +2441,12 @@
       if (players.length === 0) {
         alert("Add player stats first!");
         return;
+      }
+
+      // Automatically pause any playing music when End Season is clicked
+      if (!audioElem.paused) {
+        audioElem.pause();
+        playPauseBtn.textContent = "▶";
       }
 
       topPlayer = players[0];
