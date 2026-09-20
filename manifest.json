@@ -1,0 +1,15 @@
+{
+  "name": "Ballon d'Or Tracker",
+  "short_name": "Ballon d'Or",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070709",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/512/ballon-dor.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
