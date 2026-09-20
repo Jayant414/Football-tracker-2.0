@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ballon d'Or</title>
+  <title>Ballon d'Or Gala - Stats & Match Center</title>
 
   <!-- PWA Manifest & Ballon d'Or Taskbar Icon Support -->
   <link rel="manifest" href="manifest.json">
@@ -626,21 +626,32 @@
       opacity: 1;
     }
 
-    /* Podium Crown Badges on PFP */
+    /* Podium Rank Badge (Top-Left Pill Corner) */
     .podium-crown {
       position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.1rem;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-      z-index: 5;
-      animation: crownBounce 2s ease-in-out infinite;
+      top: -4px;
+      left: -6px;
+      background: linear-gradient(135deg, #d4af37, #996515);
+      color: #000;
+      font-size: 0.62rem;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 6px;
+      border: 1px solid #fff4cc;
+      z-index: 6;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
-    @keyframes crownBounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-2px); }
+    .podium-crown.silver {
+      background: linear-gradient(135deg, #e0e0e0, #9e9e9e);
+      color: #000;
+      border-color: #ffffff;
+    }
+    .podium-crown.bronze {
+      background: linear-gradient(135deg, #cd7f32, #8c4a16);
+      color: #fff;
+      border-color: #ffd8b1;
     }
 
     /* Overtake Cinematic Banner Animation */
@@ -1960,7 +1971,7 @@
     // ==========================================
     let players = [];
     let matches = [];
-    let previousFirstPlaceId = null; // Track leader changes for overtake animation
+    let previousFirstPlaceId = null;
 
     let editingId = null;
     let selectedPlayerIdForAvatar = null;
@@ -1985,7 +1996,6 @@
           defaults.forEach(p => playersRef.child(p.id).set(p));
         }
 
-        // Check for 1st place leader overtake
         checkForOvertake();
         renderTable();
       });
@@ -2006,7 +2016,6 @@
 
     function checkForOvertake() {
       if (players.length === 0) return;
-      // Sort players by G/A
       const sorted = [...players].sort((a, b) => {
         const gaA = (Number(a.goals) || 0) + (Number(a.assists) || 0);
         const gaB = (Number(b.goals) || 0) + (Number(b.assists) || 0);
@@ -2015,7 +2024,6 @@
 
       const currentFirst = sorted[0];
       if (previousFirstPlaceId !== null && previousFirstPlaceId !== currentFirst.id) {
-        // Trigger Overtake Cinematic Animation!
         triggerOvertakeAnimation(currentFirst.name);
       }
       previousFirstPlaceId = currentFirst.id;
@@ -2125,11 +2133,10 @@
         const isEditing = editingId === player.id;
         const firstLetter = player.name ? player.name.charAt(0).toUpperCase() : "?";
 
-        // Determine crown badge for top 3
         let crownBadge = "";
-        if (index === 0) crownBadge = `<div class="podium-crown" title="1st Place Leader">👑</div>`;
-        else if (index === 1) crownBadge = `<div class="podium-crown" title="2nd Place">🥈</div>`;
-        else if (index === 2) crownBadge = `<div class="podium-crown" title="3rd Place">🥉</div>`;
+        if (index === 0) crownBadge = `<div class="podium-crown">1st</div>`;
+        else if (index === 1) crownBadge = `<div class="podium-crown silver">2nd</div>`;
+        else if (index === 2) crownBadge = `<div class="podium-crown bronze">3rd</div>`;
 
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -2573,7 +2580,7 @@
       packPrompt.style.display = "none";
       packBox.classList.add("exploding");
 
-      // Play custom pack opening sound effect while background music keeps playing!
+      // Play custom pack opening sound effect while background music continues playing!
       packAudio.currentTime = 0;
       packAudio.play().catch(err => console.log("Pack SFX play error:", err));
 
