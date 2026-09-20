@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ballon d'Or</title>
+  <title>Ballon d'Or </title>
+
+  <!-- PWA Manifest & Ballon d'Or Taskbar Icon Support -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/ballon-dor.png">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/ballon-dor.png">
 
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1379,7 +1384,7 @@
   <div id="galaLoader" class="gala-loader-overlay">
     <div class="loader-beams"></div>
     <div class="loader-content">
-      <div class="spinning-trophy-ring">⚽</div>
+      <div class="spinning-trophy-ring">🏆</div>
       <div id="loaderMessage" class="loader-title">AUTHENTICATING GALA CREDENTIALS...</div>
     </div>
   </div>
@@ -1597,7 +1602,7 @@
 
   <script>
     // ==========================================
-    // 1. FIREBASE CONFIGURATION (Connected to your project)[cite: 8]
+    // 1. FIREBASE CONFIGURATION
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBgchMOYCG6UJeCfDVE6wpYnW0Jp7dzaFY",
@@ -1710,14 +1715,12 @@
     let matchPicks = {};
     let customMatchPlayers = [];
 
-    // Realtime Firebase Listener: Players
     if (playersRef) {
       playersRef.on("value", (snap) => {
         const data = snap.val();
         if (data) {
           players = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         } else {
-          // Default initial seed if empty
           const defaults = [
             { id: "1", name: "Jayant", goals: 6, assists: 9, avatar: "" },
             { id: "2", name: "Devansh", goals: 4, assists: 5, avatar: "" },
@@ -1732,7 +1735,6 @@
       });
     }
 
-    // Realtime Firebase Listener: Matches
     if (matchesRef) {
       matchesRef.on("value", (snap) => {
         const data = snap.val();
